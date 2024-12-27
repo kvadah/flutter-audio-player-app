@@ -1,3 +1,4 @@
+import 'package:audiotagger/audiotagger.dart';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'dart:io';
@@ -62,6 +63,20 @@ class _AudioFoldersState extends State<AudioFolders> {
       isLoading = false;
     });
   }
+  Future<String> getArtist(String filePath) async {
+  final tagger = Audiotagger();
+
+  try {
+    Map<String, String>? tags = (await tagger.readTags(path: filePath)) as Map<String, String>?;
+    String artist = tags?['artist'] ?? "Unknown Artist";
+    if (artist.isEmpty || artist.toLowerCase() == "unknown") {
+      artist = "Unknown Artist";
+    }
+    return artist;
+  } catch (e) {
+    return "Unknown Artist";
+  }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -78,12 +93,34 @@ class _AudioFoldersState extends State<AudioFolders> {
                     itemCount: audioPaths.length,
                     itemBuilder: (context, index) {
                       final path = audioPaths[index];
-                      return ListTile(
-                        title: Text(path.split('/').last),
-                       // subtitle: Text(path),
-                        onTap: () {
-                          // Handle audio file tap (e.g., play the audio)
-                        },
+                      return Container(
+                        margin: const EdgeInsets.all(0),
+                        padding: const EdgeInsets.all(0),
+                        decoration: BoxDecoration(
+                          color: const Color.fromARGB(
+                              255, 36, 35, 35), // Background color
+                          borderRadius:
+                              BorderRadius.circular(0), // Rounded corners
+                          border: Border.all(
+                              color: Colors.white, // Border color
+                              width: 0 // Border width
+                              ),
+                        ),
+                        child: ListTile(
+                          title: Text(
+                            path.split('/').last,
+                            style: const TextStyle(color: Colors.white),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            
+                          ),
+                         
+                          // subtitle: Text(path),
+                          trailing: const Icon(Icons.more_vert_outlined,color: Colors.white,),
+                          onTap: () {
+                            // Handle audio file tap (e.g., play the audio)
+                          },
+                        ),
                       );
                     },
                   ),
