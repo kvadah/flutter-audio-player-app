@@ -1,3 +1,4 @@
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:kkplayer/Accces%20Device/audiofolders.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -12,11 +13,42 @@ class AudioFiles extends StatefulWidget {
 }
 
 class _AudioFilesState extends State<AudioFiles> {
+  late final AudioPlayer _audioPlayer;
   List<String> audioPaths = [];
   bool isLoading = true;
+  bool isPlaying = false;
+  bool isPaused = false;
+  String currentUrl = '';
+
+  void playAudio(String url) async {
+    if (isPlaying && url == currentUrl) {
+      _audioPlayer.pause();
+      setState(() {
+        isPlaying = false;
+        isPaused = true;
+      });
+      log('paused');
+    } else if (isPaused && url == currentUrl) {
+      _audioPlayer.resume();
+      setState(() {
+        isPaused = false;
+        isPlaying = true;
+      });
+    } else {
+      log('yessssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss');
+      log(url);
+      _audioPlayer.play(DeviceFileSource(url));
+      setState(() {
+        isPlaying = true;
+        isPaused = false;
+        currentUrl = url;
+      });
+    }
+  }
 
   @override
   void initState() {
+    _audioPlayer = AudioPlayer();
     super.initState();
     getAllAudioFiles();
   }
@@ -106,6 +138,7 @@ class _AudioFilesState extends State<AudioFiles> {
                                 color: Colors.white,
                               ),
                               onTap: () {
+                                PlayAudio(path);
                                 // Handle audio file tap (e.g., play the audio)
                               },
                             ),
@@ -140,7 +173,6 @@ class _AudioFilesState extends State<AudioFiles> {
                                     color: Colors.white,
                                   )),
                               IconButton(
-                                  
                                   onPressed: () {},
                                   icon: const Icon(
                                     Icons.playlist_add_outlined,
