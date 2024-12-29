@@ -19,6 +19,8 @@ class _AudioFilesState extends State<AudioFiles> {
   bool isPlaying = false;
   bool isPaused = false;
   String currentUrl = '';
+  bool shallPopUp = false;
+  String currentPlayingAudio = '';
 
   void playAudio(String url) async {
     if (isPlaying && url == currentUrl) {
@@ -42,6 +44,8 @@ class _AudioFilesState extends State<AudioFiles> {
         isPlaying = true;
         isPaused = false;
         currentUrl = url;
+        currentPlayingAudio = url;
+        shallPopUp = true;
       });
     }
   }
@@ -51,6 +55,20 @@ class _AudioFilesState extends State<AudioFiles> {
     _audioPlayer = AudioPlayer();
     super.initState();
     getAllAudioFiles();
+  }
+
+  void setupAudioPlayer() {
+    _audioPlayer.onPlayerComplete.listen((event) async {
+      int currentIndex = audioPaths.indexOf(currentUrl);
+      if (currentIndex != -1 && currentIndex + 1 < audioPaths.length) {
+        // Play the next audio file if available
+        String nextAudio = audioPaths[currentIndex + 1];
+        playAudio(nextAudio);
+      } else {
+        log('No next audio to play');
+        // Handle end of playlist or looping if necessary
+      }
+    });
   }
 
   Future<void> requestAudioPermission() async {
@@ -138,7 +156,7 @@ class _AudioFilesState extends State<AudioFiles> {
                                 color: Colors.white,
                               ),
                               onTap: () {
-                                PlayAudio(path);
+                                playAudio(path);
                                 // Handle audio file tap (e.g., play the audio)
                               },
                             ),
@@ -146,6 +164,34 @@ class _AudioFilesState extends State<AudioFiles> {
                         },
                       ),
                     ),
+                    if (shallPopUp)
+                      Container(
+                          color: const Color.fromARGB(255, 66, 65, 65),
+                          child: SizedBox(
+                            height: 80,
+                            child: Center(
+                              child: ListTile(
+                                title: Text(
+                                  currentPlayingAudio.split('/').last,
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
+                                  style: const TextStyle(color: Colors.white),
+                                ),
+                                leading: const Icon(Icons.audiotrack,
+                                    color: Colors.white, size: 45),
+                                trailing: IconButton(
+                                    onPressed: () {
+                                      playAudio(currentPlayingAudio);
+                                    },
+                                    icon: Icon(
+                                        isPlaying
+                                            ? Icons.pause
+                                            : Icons.play_arrow,
+                                        color: Colors.white,
+                                        size: 45)),
+                              ),
+                            ),
+                          )),
                     Container(
                         color: const Color.fromARGB(255, 36, 35, 35),
                         child: Row(
