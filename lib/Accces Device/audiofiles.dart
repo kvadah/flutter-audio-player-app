@@ -48,16 +48,6 @@ class _AudioFilesState extends State<AudioFiles> {
         shallPopUp = true;
       });
     }
-  }
-
-  @override
-  void initState() {
-    _audioPlayer = AudioPlayer();
-    super.initState();
-    getAllAudioFiles();
-  }
-
-  void setupAudioPlayer() {
     _audioPlayer.onPlayerComplete.listen((event) async {
       int currentIndex = audioPaths.indexOf(currentUrl);
       if (currentIndex != -1 && currentIndex + 1 < audioPaths.length) {
@@ -69,6 +59,13 @@ class _AudioFilesState extends State<AudioFiles> {
         // Handle end of playlist or looping if necessary
       }
     });
+  }
+
+  @override
+  void initState() {
+    _audioPlayer = AudioPlayer();
+    super.initState();
+    getAllAudioFiles();
   }
 
   Future<void> requestAudioPermission() async {
